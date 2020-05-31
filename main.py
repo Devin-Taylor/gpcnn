@@ -1,12 +1,14 @@
 import argparse
+import math
 import os
 import sys
-import math
+
 import torch
 import torch.optim as optim
 import yaml
 from torchvision import datasets, transforms
 
+from gpcnn.dataloaders import mnist_dataloader
 from gpcnn.models.mnist.model import MNISTModel
 from gpcnn.models.mnist.trainer import MNISTTrainer
 
@@ -39,34 +41,19 @@ def main(args):
     params = get_settings(settings_path)
 
     if args.model == 'mnist':
-        dataset = datasets.MNIST(data_path, train=True, download=True,
-                                 transform=transforms.Compose([
-                                     transforms.ToTensor(),
-                                     transforms.Normalize((0.1307,), (0.3081,))
-                                 ]))
-        validation_size = int(math.floor(params['train']['validation_split'] * len(dataset)))
-        train_dataset, valid_dataset = torch.utils.data.random_split(
-            dataset=dataset,
-            lengths=[len(dataset)-validation_size, validation_size]
-        )
-        train_loader = torch.utils.data.DataLoader(
-            train_dataset,
+        train_loader, valid_loader = mnist_dataloader(
+            fmt='train',
+            data_path=data_path,
             batch_size=params['train']['batch_size'],
-            shuffle=True,
+            validation_split=params['train']['validation_split'],
             **kwargs
         )
-        valid_loader = torch.utils.data.DataLoader(
-            valid_dataset,
-            batch_size=params['train']['batch_size'],
-            shuffle=True,
+        test_loader = mnist_dataloader(
+            fmt='test',
+            data_path=data_path,
+            batch_size=params['test']['batch_size'],
             **kwargs
         )
-        test_loader = torch.utils.data.DataLoader(
-            datasets.MNIST(data_path, train=False, transform=transforms.Compose([
-                transforms.ToTensor(),
-                transforms.Normalize((0.1307,), (0.3081,))
-            ])),
-            batch_size=params['test']['batch_size'], shuffle=True, **kwargs)
 
         model = MNISTModel().to(device)
         optimizer = optim.Adadelta(model.parameters(), lr=params['train']['lr'])
