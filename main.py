@@ -67,6 +67,7 @@ def main(args):
 
         model = MNISTModel().to(device)
         optimizer = optim.Adadelta(model.parameters(), lr=params['train']['lr'])
+
         trainer = MNISTTrainer(
             model=model,
             optimizer=optimizer,
