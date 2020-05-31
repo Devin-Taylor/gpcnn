@@ -3,5 +3,6 @@ train:
   lr: 1.0
   epochs: 10
   validation_split: 0.2
+  save_every_n: 1
 test:
   batch_size: 1000

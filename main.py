@@ -11,16 +11,19 @@ from torchvision import datasets, transforms
 from gpcnn.dataloaders import mnist_dataloader
 from gpcnn.models.mnist.model import MNISTModel
 from gpcnn.models.mnist.trainer import MNISTTrainer
+from gpcnn.utils import mkdir
 
 MODELS = ['mnist']
 RESULTS_ROOT = 'results'
 DATA_ROOT = 'data'
+MODELS_ROOT = 'models'
 
 def parse_arguments(args_to_parse):
     parser = argparse.ArgumentParser(description='GP CNN')
 
     parser.add_argument('-e', '--experiment', type=str, help='name of experiment', required=True)
     parser.add_argument('-m', '--model', type=str, help='which model to use', choices=MODELS, required=True)
+    parser.add_argument('--use-checkpoint', action='store_true', default=False, help='train from checkpoints')
     parser.add_argument('--cuda', action='store_true', default=False, help='enables CUDA training')
 
     parsed_args = parser.parse_args(args_to_parse)
@@ -30,13 +33,20 @@ def get_settings(file_path):
     with open(file_path) as fd:
         return yaml.safe_load(fd)
 
+
+
 def main(args):
     device = torch.device("cuda" if args.cuda else "cpu")
     kwargs = {'num_workers': 4, 'pin_memory': True} if args.cuda else {}
 
+    mkdir(RESULTS_ROOT)
+    mkdir(DATA_ROOT)
+    mkdir(MODELS_ROOT)
+
     results_path = os.path.join(RESULTS_ROOT, args.experiment)
     data_path = os.path.join(DATA_ROOT, args.model)
     settings_path = os.path.join(f'gpcnn/models/{args.model}/settings.yaml')
+    model_path = os.path.join(MODELS_ROOT, args.experiment)
 
     params = get_settings(settings_path)
 
@@ -57,8 +67,13 @@ def main(args):
 
         model = MNISTModel().to(device)
         optimizer = optim.Adadelta(model.parameters(), lr=params['train']['lr'])
-
-        trainer = MNISTTrainer(model, optimizer)
+        trainer = MNISTTrainer(
+            model=model,
+            optimizer=optimizer,
+            save_every_n=params['train']['save_every_n'],
+            model_path=model_path,
+            use_checkpoint=args.use_checkpoint
+        )
         trainer(train_loader, valid_loader, test_loader, params['train']['epochs'], device)
     else:
         raise Exception(f'Unsupported model of type {args.model}')
