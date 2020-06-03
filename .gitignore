@@ -1,6 +1,7 @@
 data/
 results/
-models/
+./models/
 .vscode/
 
 *.pyc
+*.pt
