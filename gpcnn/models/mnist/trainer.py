@@ -26,7 +26,7 @@ class MNISTTrainer(Trainer):
             for batch_idx, (data, target) in enumerate(train_loader):
                 data, target = data.to(device), target.to(device)
                 self.optimizer.zero_grad()
-                output = self.model(data)
+                output, _ = self.model(data)
                 loss = self.model.loss(output, target)
                 loss.backward()
                 self.optimizer.step()
@@ -46,7 +46,7 @@ class MNISTTrainer(Trainer):
         with torch.no_grad():
             for batch_idx, (data, target) in enumerate(valid_loader):
                 data, target = data.to(device), target.to(device)
-                output = self.model(data)
+                output, _ = self.model(data)
                 valid_loss += self.model.loss(output, target).item()
 
         valid_loss /= (batch_idx + 1)
@@ -58,7 +58,7 @@ class MNISTTrainer(Trainer):
         with torch.no_grad():
             for batch_idx, (data, target) in enumerate(test_loader):
                 data, target = data.to(device), target.to(device)
-                output = self.model(data)
+                output, _ = self.model(data)
                 test_loss += self.model.loss(output, target).item()
 
         test_loss /= (batch_idx + 1)

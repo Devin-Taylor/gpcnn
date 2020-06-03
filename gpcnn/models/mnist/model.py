@@ -26,8 +26,8 @@ class MNISTModel(nn.Module):
         x = F.max_pool2d(x, 2)
         x = self.dropout1(x)
         x = torch.flatten(x, 1)
-        x = self.fc1(x)
-        x = F.relu(x)
-        x = self.dropout2(x)
-        output = self.fc2(x)
-        return output
+        features = self.fc1(x)
+        output = F.relu(features)
+        output = self.dropout2(output)
+        output = self.fc2(output)
+        return output, features
