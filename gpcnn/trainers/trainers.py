@@ -28,8 +28,8 @@ class Trainer(metaclass=abc.ABCMeta):
 
         for epoch in range(start_epoch, start_epoch + num_epochs):
             train_metrics = self.train_step(train_loader, epoch, device)
-            valid_metrics = self.train_step(valid_loader, epoch, device)
-            test_metrics = self.train_step(test_loader, epoch, device)
+            valid_metrics = self.validation_step(valid_loader, device)
+            test_metrics = self.test_step(test_loader, device)
             print(f"Epoch: {epoch} train: {train_metrics} validation: {valid_metrics} test: {test_metrics}")
 
             if ((epoch + 1) % self.save_every_n) == 0:
@@ -40,9 +40,9 @@ class Trainer(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def validation_step(self, valid_loader, epoch, device):
+    def validation_step(self, valid_loader, device):
         pass
 
     @abc.abstractmethod
-    def test_step(self, test_loader, epoch, device):
+    def test_step(self, test_loader, device):
         pass
