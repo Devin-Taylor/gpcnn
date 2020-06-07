@@ -38,5 +38,23 @@ def intraclass_viariance_distribution(means, stds, class_id, results_dir):
     plt.savefig(img_name, format="png", bbox_inches="tight")
     plt.close(fig)
 
-def intraclass_variance():
-    pass
+def intraclass_variance(means, stds, true_y, class_id, results_dir):
+    img_name = os.path.join(results_dir, f"class_{class_id}.png")
+
+    means_filt = means[true_y == class_id, class_id]
+    stds_filt = stds[true_y == class_id, class_id]
+
+    order_idx = means_filt.argsort()
+    means_filt = means_filt[order_idx]
+    stds_filt = stds_filt[order_idx]
+
+    fig = plt.figure()
+    plt.plot(means_filt)
+    plt.fill_between(range(len(means_filt)), means_filt - 2*stds_filt, means_filt + 2*stds_filt, alpha=.2, color="red")
+    plt.xlabel("Samples", fontsize=12)
+    plt.ylabel("Probability", fontsize=12)
+    plt.legend(["mean", "variance"], fontsize=12)
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.savefig(img_name, format="png", bbox_inches="tight")
+    plt.close(fig)
