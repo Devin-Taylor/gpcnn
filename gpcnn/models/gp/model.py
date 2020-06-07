@@ -7,17 +7,20 @@ import gpytorch
 import torch
 
 
-class GPLayer(gpytorch.models.ApproximateGP):
-    def __init__(self, num_dim, grid_bounds=(-10., 10.), grid_size=64):
+class GPLayer(gpytorch.models.AbstractVariationalGP):
+    def __init__(self, num_dim, grid_bounds=(-10., 10.), grid_size=64, mixing_params=False, sum_output=False):
         variational_distribution = gpytorch.variational.CholeskyVariationalDistribution(
-            num_inducing_points=grid_size, batch_shape=torch.Size([num_dim])
+            num_inducing_points=grid_size,
+            batch_size=num_dim
         )
-
-        variational_strategy = gpytorch.variational.MultitaskVariationalStrategy(
-            gpytorch.variational.GridInterpolationVariationalStrategy(
-                self, grid_size=grid_size, grid_bounds=[grid_bounds],
-                variational_distribution=variational_distribution,
-            ), num_tasks=num_dim,
+        variational_strategy = gpytorch.variational.AdditiveGridInterpolationVariationalStrategy(
+            self,
+            grid_size=grid_size,
+            grid_bounds=[grid_bounds],
+            num_dim=num_dim,
+            variational_distribution=variational_distribution,
+            mixing_params=mixing_params,
+            sum_output=sum_output,
         )
         super().__init__(variational_strategy)
 
