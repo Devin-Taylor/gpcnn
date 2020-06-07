@@ -116,7 +116,7 @@ def main(args):
             feature_extractor=gen_model,
             num_dim=params['num_features'],
             num_classes=params['num_classes'],
-            num_data=len(train_loader)
+            num_data=len(train_loader.dataset)
         ).to(device)
 
         optimizer = optim.SGD([
