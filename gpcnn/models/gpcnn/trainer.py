@@ -36,7 +36,6 @@ class GPCNNTrainer(Trainer):
                 t.set_postfix(loss=np.asscalar(loss))
                 t.update()
                 acc_loss += np.asscalar(loss)
-                break
         return {
             "loss" : acc_loss / (batch_idx + 1)
         }
@@ -54,7 +53,6 @@ class GPCNNTrainer(Trainer):
                 pred = output.probs.mean(0).argmax(1)
                 correct += pred.eq(target.view_as(pred)).cpu().sum()
                 valid_loss += -self.model.mll(model_output, target).item()
-                break
         return {
             'loss' : valid_loss / (batch_idx + 1),
             'accuracy' : int(correct) / float(len(valid_loader.dataset))
@@ -72,23 +70,8 @@ class GPCNNTrainer(Trainer):
                 output = self.model.likelihood(model_output)
                 pred = output.probs.mean(0).argmax(1)
                 correct += pred.eq(target.view_as(pred)).cpu().sum()
-                # output_, std_dev = softmax_forward_sampling(model_output, self.model.likelihood.mixing_weights, n_samples=100)
                 test_loss += -self.model.mll(model_output, target).item()
         return {
             'loss' : test_loss / (batch_idx + 1),
             'accuracy' : int(correct) / float(len(test_loader.dataset))
         }
-
-def softmax_forward_sampling(latent_func, mixing_weights, n_samples=10, num_features=128, n_classes=10):
-    samples = latent_func.rsample(sample_shape=torch.Size((n_samples,)))
-    if samples.dim() == 2:
-        samples = samples.unsqueeze(-1).transpose(-2, -1)
-    samples = samples.permute(1, 2, 0).contiguous()  # Now n_featuers, n_data, n_samples
-    if samples.ndimension() != 3:
-        raise RuntimeError("f should have 3 dimensions: features x data x samples")
-    num_features, n_data, _ = samples.size()
-    if num_features != num_features:
-        raise RuntimeError("There should be %d features" % self.num_features)
-    mixed_fs = mixing_weights.matmul(samples.view(num_features, n_samples * n_data))
-    softmax = torch.nn.functional.softmax(mixed_fs.t(), 1).view(n_data, n_samples, n_classes)
-    return torch.distributions.Categorical(probs=softmax.mean(1)), softmax.std(dim=1)
