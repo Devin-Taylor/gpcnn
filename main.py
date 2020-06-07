@@ -124,12 +124,11 @@ def main(args):
             num_data=len(train_loader.dataset)
         ).to(device)
 
-        optimizer = optim.SGD([
-            {'params': model.feature_extractor.parameters(), 'weight_decay': 1e-4},
+        optimizer = optim.Adam([
             {'params': model.gp_layer.hyperparameters(), 'lr': params['train']['lr'] * 0.01},
             {'params': model.gp_layer.variational_parameters()},
             {'params': model.likelihood.parameters()},
-        ], lr=params['train']['lr'], momentum=0.9, nesterov=True, weight_decay=0)
+        ], lr=params['train']['lr'], weight_decay=0)
 
         trainer = GPCNNTrainer(
             model=model,
