@@ -18,13 +18,14 @@ def softmax_forward_sampling(latent_func, mixing_weights, n_samples=10, num_feat
     softmax = torch.nn.functional.softmax(mixed_fs.t(), 1).view(n_data, n_samples, n_classes)
     return torch.distributions.Categorical(probs=softmax.mean(1)), softmax.std(dim=1)
 
-def intraclass_viariance_distribution(means, stds, class_id, results_dir):
+def intraclass_viariance_distribution(means, stds, true_y, class_id, results_dir):
     img_name = os.path.join(results_dir, f"class_{class_id}.png")
 
     preds = means.argmax(axis=1)
-    correct_idx = preds == class_id
+    correct_idx = ((preds == class_id) & (true_y == class_id))
+    incorrect_idx = ((preds == class_id) & (true_y != class_id))
     correct_stds = stds[correct_idx, preds[correct_idx]]
-    incorrect_stds = stds[~correct_idx, preds[~correct_idx]]
+    incorrect_stds = stds[incorrect_idx, preds[incorrect_idx]]
 
     fig = plt.figure()
     plt.hist(correct_stds, alpha=0.75, bins=20)
@@ -35,6 +36,7 @@ def intraclass_viariance_distribution(means, stds, class_id, results_dir):
     plt.ylabel("Freqency", fontsize=12)
     plt.legend(loc='best', fontsize=12)
     plt.legend(['Correct', 'Incorrect'], fontsize=12)
+    plt.title(f"Class: {class_id}", fontsize=12)
     plt.savefig(img_name, format="png", bbox_inches="tight")
     plt.close(fig)
 
@@ -56,5 +58,6 @@ def intraclass_variance(means, stds, true_y, class_id, results_dir):
     plt.legend(["mean", "variance"], fontsize=12)
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
+    plt.title(f"Class: {class_id}", fontsize=12)
     plt.savefig(img_name, format="png", bbox_inches="tight")
     plt.close(fig)

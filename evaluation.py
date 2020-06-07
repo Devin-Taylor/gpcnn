@@ -36,5 +36,5 @@ def evaluate(model, test_loader, device, n_classes: int, results_dir: str, n_sam
     variance_path = _create_subfolder(results_dir, 'variances')
 
     for idx in range(n_classes):
-        intraclass_viariance_distribution(means=all_means, stds=all_std, class_id=idx, results_dir=distribution_path)
+        intraclass_viariance_distribution(means=all_means, stds=all_std, true_y=labels, class_id=idx, results_dir=distribution_path)
         intraclass_variance(means=all_means, stds=all_std, true_y=labels, class_id=idx, results_dir=variance_path)
