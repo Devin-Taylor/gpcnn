@@ -15,6 +15,7 @@ from gpcnn.models.mnist.model import MNISTModel
 from gpcnn.models.mnist.trainer import MNISTTrainer
 from gpcnn.utils import mkdir
 from gpcnn.utils.model_helpers import Checkpointer
+from evaluation import evaluate
 
 GENERATOR_MODELS = ['mnist']
 MODELS = GENERATOR_MODELS + ['gpcnn']
@@ -31,6 +32,7 @@ def parse_arguments(args_to_parse):
 
     parser.add_argument('--use-checkpoint', action='store_true', default=False, help='train from checkpoints')
     parser.add_argument('--cuda', action='store_true', default=False, help='enables CUDA training')
+    parser.add_argument('--evaluate', action='store_true', default=False, help='perform uncertainty evaluations')
 
     parsed_args = parser.parse_args(args_to_parse)
     return parsed_args
@@ -53,6 +55,10 @@ def main(args):
     data_path = os.path.join(DATA_ROOT, args.model)
     settings_path = os.path.join(f'gpcnn/models/{args.model}/settings.yaml')
     model_path = os.path.join(MODELS_ROOT, args.model)
+
+    mkdir(results_path)
+    mkdir(data_path)
+    mkdir(model_path)
 
     params = get_settings(settings_path)
 
@@ -81,7 +87,6 @@ def main(args):
             model_path=model_path,
             use_checkpoint=args.use_checkpoint
         )
-        trainer(train_loader, valid_loader, test_loader, params['train']['epochs'], device)
     elif args.model == 'gpcnn':
         if args.generator not in GENERATOR_MODELS:
             raise Exception(f"Unsupported feature geneator model of type '{args.generator}'")
@@ -133,10 +138,22 @@ def main(args):
             model_path=model_path,
             use_checkpoint=args.use_checkpoint
         )
-        trainer(train_loader, valid_loader, test_loader, params['train']['epochs'], device)
-
     else:
         raise Exception(f'Unsupported model of type {args.model}')
+
+    if args.evaluate and args.model != 'gpcnn':
+        raise Exception(f"Evaluation for '{args.model}' is currently not supported")
+    elif args.evaluate:
+        checkpointer = Checkpointer(
+            model=model,
+            optimizer=optimizer,
+            model_path=os.path.join(MODELS_ROOT, args.model)
+        )
+        checkpointer.restore(use_checkpoint=True)
+
+        evaluate(model, test_loader, device, n_classes=params['num_classes'], results_dir=results_path)
+    else:
+        trainer(train_loader, valid_loader, test_loader, params['train']['epochs'], device)
 
 if __name__ == '__main__':
     args = parse_arguments(sys.argv[1:])
