@@ -1,0 +1,7 @@
+gpytorch==0.3.6
+h5py==2.10.0
+matplotlib==3.0.3
+numpy==1.16.2
+torch==1.5.0
+torchvision==0.6.0+cpu
+tqdm==4.40.2
