@@ -18,7 +18,7 @@ class MNISTModel(nn.Module):
 
         self.loss = nn.CrossEntropyLoss()
 
-    def forward(self, x):
+    def forward(self, x: torch.tensor):
         x = self.conv1(x)
         x = F.relu(x)
         x = self.conv2(x)

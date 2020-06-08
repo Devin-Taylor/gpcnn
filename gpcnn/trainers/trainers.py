@@ -1,7 +1,9 @@
 import abc
 
+import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.utils.data import DataLoader
 
 from gpcnn.utils.model_helpers import Checkpointer
 
@@ -22,7 +24,7 @@ class Trainer(metaclass=abc.ABCMeta):
 
         self.model_path = model_path
 
-    def __call__(self, train_loader, valid_loader, test_loader, num_epochs, device):
+    def __call__(self, train_loader: DataLoader, valid_loader: DataLoader, test_loader: DataLoader, num_epochs: int, device: torch.device):
 
         start_epoch = self.checkpointer.restore(use_checkpoint=self.use_checkpoint, checkpoint_number=self.checkpoint_number)
 
@@ -36,13 +38,13 @@ class Trainer(metaclass=abc.ABCMeta):
                 self.checkpointer.save(epoch=epoch)
 
     @abc.abstractmethod
-    def train_step(self, train_loader, epoch, device):
+    def train_step(self, train_loader: DataLoader, epoch: int, device: torch.device):
         pass
 
     @abc.abstractmethod
-    def validation_step(self, valid_loader, device):
+    def validation_step(self, valid_loader: DataLoader, device: torch.device):
         pass
 
     @abc.abstractmethod
-    def test_step(self, test_loader, device):
+    def test_step(self, test_loader: DataLoader, device: torch.device):
         pass

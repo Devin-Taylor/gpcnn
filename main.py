@@ -37,7 +37,7 @@ def parse_arguments(args_to_parse):
     parsed_args = parser.parse_args(args_to_parse)
     return parsed_args
 
-def get_settings(file_path):
+def get_settings(file_path: str):
     with open(file_path) as fd:
         return yaml.safe_load(fd)
 

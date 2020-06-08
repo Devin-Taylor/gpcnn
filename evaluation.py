@@ -1,20 +1,23 @@
 import os
 
+import gpytorch
 import numpy as np
 import torch
+from torch.utils.data import DataLoader
 
 from gpcnn.utils import mkdir, rmdir
 from gpcnn.utils.evaluation_helpers import (intraclass_variance,
                                             intraclass_viariance_distribution,
                                             softmax_forward_sampling)
 
-def _create_subfolder(results_dir, subfolder):
+
+def _create_subfolder(results_dir: str, subfolder: str):
     path = os.path.join(results_dir, subfolder)
     rmdir(path)
     mkdir(path)
     return path
 
-def evaluate(model, test_loader, device, n_classes: int, results_dir: str, n_samples: int = 100):
+def evaluate(model: gpytorch.Module, test_loader: DataLoader, device: torch.device, n_classes: int, results_dir: str, n_samples: int = 100):
     model.eval()
     model.likelihood.eval()
     all_means = []

@@ -35,7 +35,7 @@ class Checkpointer(object):
             mkdir(self.model_path)
         return start_epoch
 
-    def save(self, epoch):
+    def save(self, epoch: int):
         fn = os.path.join(self.model_path, f'ckpt_{epoch}.pt')
         torch.save({
             'epoch': epoch,

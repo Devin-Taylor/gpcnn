@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.utils.data import DataLoader
 from tqdm import trange
 
 from gpcnn.trainers import Trainer
@@ -12,7 +13,7 @@ class MNISTTrainer(Trainer):
         super().__init__(model, optimizer, save_every_n, model_path, use_checkpoint, checkpoint_number)
         self.show_progress_bar = show_progress_bar
 
-    def train_step(self, train_loader, epoch_num, device):
+    def train_step(self, train_loader: DataLoader, epoch_num: int, device: torch.device):
         self.model.train()
         acc_loss = 0
 
@@ -40,7 +41,7 @@ class MNISTTrainer(Trainer):
             "loss" : acc_loss / (batch_idx + 1)
         }
 
-    def validation_step(self, valid_loader, device):
+    def validation_step(self, valid_loader: DataLoader, device: torch.device):
         self.model.eval()
         valid_loss = 0
         with torch.no_grad():
@@ -52,7 +53,7 @@ class MNISTTrainer(Trainer):
         valid_loss /= (batch_idx + 1)
         return valid_loss
 
-    def test_step(self, test_loader, device):
+    def test_step(self, test_loader: DataLoader, device: torch.device):
         self.model.eval()
         test_loss = 0
         with torch.no_grad():

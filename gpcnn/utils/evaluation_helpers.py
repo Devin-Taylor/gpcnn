@@ -1,10 +1,12 @@
 import os
 
+import gpytorch
 import matplotlib.pyplot as plt
+import numpy as np
 import torch
 
 
-def softmax_forward_sampling(latent_func, mixing_weights, n_samples=10, num_features=128, n_classes=10):
+def softmax_forward_sampling(latent_func: gpytorch.distributions.MultivariateNormal, mixing_weights: torch.tensor, n_samples: int = 10, num_features: int = 128, n_classes: int = 10):
     samples = latent_func.rsample(sample_shape=torch.Size((n_samples,)))
     if samples.dim() == 2:
         samples = samples.unsqueeze(-1).transpose(-2, -1)
@@ -18,7 +20,7 @@ def softmax_forward_sampling(latent_func, mixing_weights, n_samples=10, num_feat
     softmax = torch.nn.functional.softmax(mixed_fs.t(), 1).view(n_data, n_samples, n_classes)
     return torch.distributions.Categorical(probs=softmax.mean(1)), softmax.std(dim=1)
 
-def intraclass_viariance_distribution(means, stds, true_y, class_id, results_dir):
+def intraclass_viariance_distribution(means: np.ndarray, stds: np.ndarray, true_y: np.ndarray, class_id: int, results_dir: str):
     img_name = os.path.join(results_dir, f"class_{class_id}.png")
 
     preds = means.argmax(axis=1)
@@ -40,7 +42,7 @@ def intraclass_viariance_distribution(means, stds, true_y, class_id, results_dir
     plt.savefig(img_name, format="png", bbox_inches="tight")
     plt.close(fig)
 
-def intraclass_variance(means, stds, true_y, class_id, results_dir):
+def intraclass_variance(means: np.ndarray, stds: np.ndarray, true_y: np.ndarray, class_id: int, results_dir: str):
     img_name = os.path.join(results_dir, f"class_{class_id}.png")
 
     means_filt = means[true_y == class_id, class_id]
