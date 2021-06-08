@@ -2,6 +2,22 @@
 
 Use Gaussian processes (GPs) to add uncertainty to convolutional neural networks (CNNs). GPCNN uses pretrained CNNs as feature extractors to train a GP classifier. The uncertainty in the CNN predictions is determined using the variance associated with the prediction made by the GP classifier, as opposed to use the outputs of the CNN to determine the uncertainty directly.
 
+## Setup
+
+**NOTE** This implementation is not compatible with the latest version of GPyTorch.
+
+Create a virtual environment, for example using Anaconda:
+
+> conda create -n gpcnn python=3.6
+
+Activate the virtual environment:
+
+> conda activate gpcnn
+
+Install the requirements:
+
+> pip install -r requirements.txt
+
 ## Experiments
 
 For all experiments, the hyperparameters can be adjusted in the `settings.yaml` file associated with each model in the `models/` directory.
